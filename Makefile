@@ -1,11 +1,11 @@
 # ===== Makefile =====
 
 # Binær navn
-TARGET := makezx81
+TARGET := p2rom
 
 # Kilder
 CPP_SRCS := builder.cpp
-C_SRCS   := $(wildcard zx7_src/*.c)
+C_SRCS   := $(wildcard zx7/*.c)
 
 # Build-mappe
 BUILD_DIR := build
