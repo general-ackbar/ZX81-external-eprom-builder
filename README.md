@@ -23,8 +23,47 @@ This repository contains a **small command-line utility** that makes the process
 
 ```bash
 make
+```
+
+---
 
 ## Usage
+
 ```bash
 ./p2rom [-b base.bin] [-l loader.bin] [-o output.rom] input.p
+```
+
+### Examples
+
+```bash
+# Creates a ROM image (game.rom) containing and autorunning game.p
+./p2rom game.p
+
+# Creates a ROM image containing and autorunning game.p.zx7, output is xyz.rom
+./p2rom -o xyz.rom game.p.zx7
+
+# Creates a ROM image with game.p, using myloader.bin and customrom.bin
+./p2rom -b customrom.bin -l myloader.bin game.p
+```
+
+---
+
+## ROM Modifications
+
+The ZX81 system ROM needs a few modifications to autorun the `.P` file.  
+See [this description](https://quix.us/timex/rigter/AutoBasic.html) for details.
+
+- The source code adjusted for the **sjasmplus** assembler is in the `asm` folder.
+- Includes source for the loader and zx7 decompression code.
+- Precompiled versions are in the `bin` folder.
+
+---
+
+## Modifying Loader or Base Image
+
+If you want to modify the loader or base image, assemble them with:
+
+```bash
+sjasmplus file.asm --raw=output.bin
+```
 
