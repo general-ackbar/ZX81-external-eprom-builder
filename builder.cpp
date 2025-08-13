@@ -102,7 +102,7 @@ int main(int argc, char** argv) {
     const char* out_path   = nullptr;
 
     int opt;
-    while ((opt = getopt(argc, argv, "b:u:o:h")) != -1) {
+    while ((opt = getopt(argc, argv, "b:l:o:h")) != -1) {
         switch (opt) {
             case 'b': base_path  = optarg; break;
             case 'l': loader_path = optarg; break;
