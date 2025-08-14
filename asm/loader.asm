@@ -2,25 +2,24 @@
         ORG     $2000
 
 BOOT:
-        ; HL = start på komprimeret data: lige efter kode + ZX7-rutinen
+        ; HL = start compressed data right after code + ZX7-routine
         ld      hl, COMPRESSED_START
 
-        ; DE = destination for VERSN.. (systemvariabler) i RAM
+        ; DE = destination for VERSN.. (sys var) in RAM
         ld      de, $4009
 
-        ; dekomp
+        ; decompress
         call    dzx7_standard
 
-        ; sørg for at maskinen ikke vælter
+        ; set sys vars
         ld      (iy+0),$ff      ; ERR_NR = $FF
         xor     a
         ld      ($4006),a       ; MODE = K
         ld      (iy+1),$c0      ; FLAGS reset
         jp      $0f2b           ; exit via SLOW -> LINERUN ($0676)
 
-; --- ZX7 standard rutine (din vedhæftede fil)
+
         include "dzx7_standard.asm"
 
 COMPRESSED_START:
-        ; her placerer vi komprimerede bytes direkte bagefter ved build
-        ; (C++-værktøjet lægger filen her og fylder ud med 0 til $4000)
+        ; The actual data is added by p2bin

@@ -136,7 +136,7 @@ int main(int argc, char** argv) {
         std::vector<uint8_t> stub = file_exists(loader_path) ? slurp(loader_path) : load_embedded_loader();
         if (stub.size() > 8192) throw std::runtime_error("Loader too large for upper 8K");
 
-        // P-data (auto-komprimer hvis ikke .zx7)
+        // P-data (auto-compress if not .zx7)
         auto payload_raw = slurp(p_path);
         std::vector<uint8_t> pzx7;
         bool already_zx7 = is_zx7(p_path);
@@ -149,13 +149,13 @@ int main(int argc, char** argv) {
             std::cout << "done (" << pzx7.size() << " bytes)\n";
         }
 
-        // Byg 16K ROM
+        // Build 16K ROM
         std::vector<uint8_t> rom(16384, 0x00);
 
-        // Nedre 8K
+        // Lower 8K
         std::copy(base.begin(), base.end(), rom.begin());
 
-        // Øvre 8K: stub + data
+        // Upper 8K: stub + data
         const size_t loader_off = 0x2000;
         size_t cursor = loader_off;
         if (cursor + stub.size() > rom.size()) throw std::runtime_error("Loader does not fit");
@@ -168,7 +168,7 @@ int main(int argc, char** argv) {
         std::copy(pzx7.begin(), pzx7.end(), rom.begin() + cursor);
         cursor += pzx7.size();
 
-        // Skriv ud
+        // Write
         std::ofstream out(out_file, std::ios::binary);
         out.write(reinterpret_cast<const char*>(rom.data()), (std::streamsize)rom.size());
         if (!out) throw std::runtime_error("Could not write output");
