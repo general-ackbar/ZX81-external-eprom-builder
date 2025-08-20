@@ -1,4 +1,4 @@
-; upperrom_stub.asm (build as raw binary located at ORG 0x2000)
+; loader.asm (build as raw binary located at ORG 0x2000)
         ORG     $2000
 
 BOOT:
