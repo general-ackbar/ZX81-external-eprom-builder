@@ -12,7 +12,7 @@ It can contain **8 × 8 KB ROMs** but also supports organizing the EPROM into **
 The [original repository](https://github.com/thomasheckmann/zx81-external-eprom) contains the code to achieve this (see the `autorun` folder).  
 This repository contains a **small command-line utility** that makes the process easier:
 
-- Combines a modified system ROM, a small loader, and a `.P` file.
+- Combines a modified system ROM, a small loader, and one or more `.P` file.
 - Compresses the `.P` file using **zx7**.
 - Loader decompresses the file at load time.
 - Makes it possible to include programs **larger than 8 KB**.
@@ -30,7 +30,7 @@ make
 ## Usage
 
 ```bash
-./p2rom [-b base.bin] [-l loader.bin] [-o output.rom] input.p
+./p2rom [-b base.bin] [-l loader.bin] [-o output.rom] input.p [input2.p input3.p ...]
 ```
 
 ### Examples
@@ -44,6 +44,13 @@ make
 
 # Creates a ROM image with game.p, using myloader.bin and customrom.bin
 ./p2rom -b customrom.bin -l myloader.bin game.p
+
+# Creates a ROM image with 3 games.p and include a small menu based on the filenames
+./p2rom  game1.p game2.p game3.p
+
+# Creates a ROM image with 2 games.p and a minimalistic menu without game names
+./p2rom -s game1.p game2.p game3.p
+
 ```
 
 ---
@@ -66,4 +73,6 @@ If you want to modify the loader or base image, assemble them with:
 ```bash
 sjasmplus file.asm --raw=output.bin
 ```
+
+Please note that if you supply more than one input P-file, it is not possible to specify a custom loader.
 
