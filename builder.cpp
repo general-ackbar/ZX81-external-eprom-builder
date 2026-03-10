@@ -145,14 +145,16 @@ int main(int argc, char** argv) {
     const char* loader_path = nullptr;
     const char* out_path   = nullptr;
 	bool use_simple_menu = false;
+    bool force_loader = false;
 	
     int opt;
-    while ((opt = getopt(argc, argv, "b:l:o:hs")) != -1) {
+    while ((opt = getopt(argc, argv, "b:l:o:hsf")) != -1) {
         switch (opt) {
             case 'b': base_path  = optarg; break;
             case 'l': loader_path = optarg; break;
             case 'o': out_path   = optarg; break;
             case 's': use_simple_menu = true; break;
+            case 'f': force_loader = true; break;
             case 'h':
             default:
                 std::cerr <<
@@ -160,6 +162,8 @@ int main(int argc, char** argv) {
                   "  -b  Optional base ROM (8K)\n"
                   "  -l  Optional loader (ignored when multiple P-files, uses menu loader)\n"
                   "  -o  Optional output name\n"
+                  "  -s  Optional use very simple menu for multiple files\n"
+                  "  -f  Optional force a custom loader with multiple files (warning: you should know what you are doing)\n"
                   "  Multiple P-files will create a menu-driven ROM\n";
                 return (opt=='h') ? 0 : 1;
         }
@@ -188,8 +192,14 @@ int main(int argc, char** argv) {
         bool use_menu = (p_paths.size() > 1);
         
         if (use_menu) {
-            stub = load_embedded_menuloader();
-            std::cout << "[info] Using menu loader for " << p_paths.size() << " P-files\n";
+            if(!force_loader)
+            {
+                stub = load_embedded_menuloader();
+                std::cout << "[info] Using menu loader for " << p_paths.size() << " P-files\n";
+            } else {
+                stub =  slurp(loader_path);
+                std::cout << "[note] Using custom menu loader for " << p_paths.size() << " P-files\n";
+            }
         } else {
             stub = file_exists(loader_path) ? slurp(loader_path) : load_embedded_loader();
             std::cout << "[info] Using single-file loader\n";
@@ -290,7 +300,21 @@ int main(int argc, char** argv) {
 	                rom[cursor++] = 0x76;	//New line
                 	std::cout << "[info]   Entry " << (i + 1) << ": \"" << filename_entry << "\" (" << filename_entry.length() << " bytes)\n";
             	}
-				rom[cursor++] = 0x09; // Add String terminator
+
+                //Write BASIC option to end of list
+                std::string basic_entry = "B) BASIC";
+                rom[cursor++] = 0x76;
+                for (char c : basic_entry) {
+                    if (cursor >= rom.size()) {
+                        throw std::runtime_error("Filename block exceeds ROM size");
+                    }
+                
+                    c = std::toupper(static_cast<unsigned char>(c));
+                    rom[cursor++] = ascii_to_zx81(c);
+                }
+                
+                
+                rom[cursor++] = 0x09; // Add String terminator
     	        size_t filename_block_size = cursor - filename_block_start;
 	            std::cout << "[info] Filename block: " << filename_block_size << " bytes total\n";
             }
@@ -309,6 +333,8 @@ int main(int argc, char** argv) {
         // Patch menu loader with actual P-file offsets (only for multi-file mode)
         if (use_menu && compressed_files.size() > 1) {
             std::cout << "[info] Patching menu loader with P-file offsets...\n";
+            if(force_loader)
+                std::cout << "[warning] Custom loader forced. This might end bad...\n";
             
             size_t search_start = loader_off;
             size_t search_end = loader_off + stub.size();
